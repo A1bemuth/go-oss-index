@@ -1,9 +1,5 @@
 package types
 
-type OssIndexRequest struct {
-	Coordinates []string `json:"coordinates"`
-}
-
 type Vulnerability struct {
 	Id            string   `json:"id"`
 	Title         string   `json:"title"`

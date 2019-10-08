@@ -1,4 +1,4 @@
-package client
+package ossindex
 
 import (
 	"bytes"
@@ -10,15 +10,15 @@ import (
 	"github.com/A1bemuth/go-oss-index/types"
 )
 
-const BASE_URI = "https://ossindex.sonatype.org/api/v3/component-report"
+const DEFAULT_URI = "https://ossindex.sonatype.org/api/v3/component-report"
 
 type Client struct {
 	Uri    string
 	client http.Client
 }
 
-func New() Client {
-	return Client{Uri: BASE_URI}
+type ossIndexRequest struct {
+	Coordinates []string `json:"coordinates"`
 }
 
 func (c *Client) Get(purls []string) ([]types.ComponentReport, error) {
@@ -26,7 +26,7 @@ func (c *Client) Get(purls []string) ([]types.ComponentReport, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp, err := c.client.Post(c.Uri, "application/json", request)
+	resp, err := c.client.Post(c.GetUri(), "application/json", request)
 	if err != nil {
 		return nil, err
 	}
@@ -37,8 +37,15 @@ func (c *Client) Get(purls []string) ([]types.ComponentReport, error) {
 	return reports, err
 }
 
+func (c *Client) GetUri() string {
+	if c.Uri != "" {
+		return c.Uri
+	}
+	return DEFAULT_URI
+}
+
 func makeRequest(purls []string) (*bytes.Buffer, error) {
-	request := types.OssIndexRequest{
+	request := ossIndexRequest{
 		Coordinates: purls,
 	}
 	serialized, err := json.Marshal(request)

@@ -1,4 +1,4 @@
-package client
+package ossindex
 
 import (
 	"testing"
@@ -17,7 +17,7 @@ func TestFindsPackagesWithVulnerabilities(t *testing.T) {
 
 func verifyReturnsRequestedPackages(purls []string) func(t *testing.T) {
 	return func(t *testing.T) {
-		client := New()
+		client := Client{}
 		require := require.New(t)
 		reports, err := client.Get(purls)
 

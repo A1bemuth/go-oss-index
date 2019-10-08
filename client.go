@@ -26,7 +26,7 @@ func (c *Client) Get(purls []string) ([]types.ComponentReport, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp, err := c.client.Post(c.GetUri(), "application/json", request)
+	resp, err := c.client.Post(c.getUri(), "application/json", request)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func (c *Client) Get(purls []string) ([]types.ComponentReport, error) {
 	return reports, err
 }
 
-func (c *Client) GetUri() string {
+func (c *Client) getUri() string {
 	if c.Uri != "" {
 		return c.Uri
 	}

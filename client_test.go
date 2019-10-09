@@ -20,7 +20,7 @@ func TestProcessesMissingVersion(t *testing.T) {
 	require := require.New(t)
 
 	_, err := client.Get([]string{"pkg:npm/url-parse"})
-	require.Equal(err, ErrMissingCoordinatesVersion)
+	require.Equal(ErrMissingCoordinatesVersion, err)
 }
 
 func TestProcessesTooManyRequests(t *testing.T) {
@@ -33,6 +33,18 @@ func TestProcessesTooManyRequests(t *testing.T) {
 		}
 	}
 	t.Fatal("Did not get a TooManyRequests error")
+}
+
+func TestCredentials(t *testing.T) {
+	client := Client{
+		User:     "foo@bar.com",
+		Password: "pass",
+	}
+	require := require.New(t)
+
+	_, err := client.Get([]string{"pkg:npm/url-parse@1.4.2"})
+
+	require.Equal(ErrUnauthorized, err)
 }
 
 func verifyReturnsRequestedPackages(purls []string) func(t *testing.T) {

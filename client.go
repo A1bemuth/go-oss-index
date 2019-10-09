@@ -3,6 +3,8 @@ package ossindex
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -10,7 +12,12 @@ import (
 	"github.com/A1bemuth/go-oss-index/types"
 )
 
-const DEFAULT_URI = "https://ossindex.sonatype.org/api/v3/component-report"
+const default_uri = "https://ossindex.sonatype.org/api/v3/component-report"
+
+var (
+	ErrMissingCoordinatesVersion = errors.New("Component coordinates should always specify a version")
+	ErrTooManyRequests           = errors.New("Too many requests")
+)
 
 type Client struct {
 	Uri    string
@@ -31,17 +38,23 @@ func (c *Client) Get(purls []string) ([]types.ComponentReport, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-
-	reports, err := readResponse(resp.Body)
-
-	return reports, err
+	switch resp.StatusCode {
+	case 200:
+		return readResponse(resp.Body)
+	case 400:
+		return nil, ErrMissingCoordinatesVersion
+	case 429:
+		return nil, ErrTooManyRequests
+	default:
+		return nil, fmt.Errorf("Unexpected response code: %d %s", resp.StatusCode, resp.Status)
+	}
 }
 
 func (c *Client) getUri() string {
 	if c.Uri != "" {
 		return c.Uri
 	}
-	return DEFAULT_URI
+	return default_uri
 }
 
 func makeRequest(purls []string) (*bytes.Buffer, error) {
